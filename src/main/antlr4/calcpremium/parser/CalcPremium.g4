@@ -1,42 +1,53 @@
 grammar CalcPremium;
 
-start: statement* EOF;
+start: topLevel* EOF;
+
+topLevel
+    : defineFunction ;
+
+defineFunction: FUNCTION IDENTIFIER '(' argumentList ')' ':' returnType = typeId (body = statementList) ;
+argumentList: (argument (',' argument)*)? ;
+argument: typeId IDENTIFIER ;
+
+statementList: '{' declaringStmt* '}' ;
+declaringStmt: statement | declareStatement ';' ;
 
 statement
     : ifStatement
     | whileStatement
+    | forStatement
     | statementList
     | assignment ';'
+    | returnStatement ';'
+    | loopControlStatement ';'
+    | nullStatement
     ;
 
-statementList: '{' declaringStmt* '}';
-
-declaringStmt
-    : statement #AAA
-    | declareStatement ';' #BA
-    ;
-
-declareStatement: typeId IDENTIFIER assignOperators value = expression;
+declareStatement: typeId IDENTIFIER assignOperators value = expression ;
+returnStatement: RETURN expression? ;
+loopControlStatement: BREAK | CONTINUE ;
+nullStatement: ';' ;
 ifStatement: IF '(' expression ')' then = statement (ELSE otherwise = statement)? ;
 whileStatement: WHILE '(' expression ')' body = statement ;
+forStatement: FOR '(' declareStatement ';' expression ';' expression ')' body = statement;
 
-assignment: expression (ASSIGN expression);
+assignment: expression (assignOperators expression)? ;
 
 expression: orExpression ;
-orExpression: andExpression (LOGICAL_OR andExpression)* ;
-andExpression: compareExpression (LOGICAL_AND compareExpression)* ;
-compareExpression: relationalExpression ((EQ | NEQ) relationalExpression)* ;
-relationalExpression: additionExpression ((LT | LTE | GT | GTE) additionExpression)* ;
-additionExpression: multiplicationExpression ((PLUS | MINUS) multiplicationExpression)* ;
-multiplicationExpression: unaryExpression ((STAR | DIVIDE | MODUO) unaryExpression)* ;
+orExpression: andExpression (op+=LOGICAL_OR rest+=andExpression)* ;
+andExpression: compareExpression (op+=LOGICAL_AND rest+=compareExpression)* ;
+compareExpression: relationalExpression (op+=(EQ | NEQ) rest+=relationalExpression)* ;
+relationalExpression: additionExpression (op+=(LT | LTE | GT | GTE) rest+=additionExpression)* ;
+additionExpression: multiplicationExpression (op+=(PLUS | MINUS) rest+=multiplicationExpression)* ;
+multiplicationExpression: unaryExpression (op+=(STAR | DIVIDE | MODUO) rest+=unaryExpression)* ;
 unaryExpression: (MINUS | LOGICAL_NOT)? unarySuffix (INC | DEC)? ;
 unarySuffix: term unarySuffixOperations*;
 
 unarySuffixOperations
     : '(' args=expressionList ')' #Funcall
     | '[' index=expression ']' #ArrIdx
-    | '?len' #ArrayLen
-    | '?new' #ArrayPush
+    | '.len' #ArrayLen
+    | '.new' #ArrayPush
     ;
 
 term
@@ -62,6 +73,8 @@ typeId:
     | BOOL_TYPE
     | VOID_TYPE
     | IDENTIFIER
+    | CHAR_TYPE
+    | STRING_TYPE
     | arrayType
     ;
 
@@ -69,6 +82,8 @@ literal
     : NUMBER
     | TRUE
     | FALSE
+    | CHAR
+    | STRING
     ;
 
 assignOperators
@@ -122,6 +137,7 @@ BOOL_TYPE: 'bool';
 INT_TYPE: 'int';
 CHAR_TYPE: 'char';
 VOID_TYPE: 'void';
+STRING_TYPE: 'string';
 ARR: 'arr';
 
 FOR: 'for';
@@ -139,8 +155,12 @@ TRUE: 'true';
 FALSE: 'false';
 
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
+STRING: '"' STRELEM* '"';
+CHAR: '\'' STRELEM '\'';
+
 
 // Helper fragments
+fragment STRELEM: (~[\\'"\n] | '\\' ~[\n]);
 fragment WHOLE: [1-9] [0-9]*;
 
 // Skipp following
