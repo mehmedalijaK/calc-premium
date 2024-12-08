@@ -1,5 +1,7 @@
 grammar CalcPremium;
 
+options { visitor = true; }
+
 start: topLevel* EOF;
 
 topLevel
@@ -9,8 +11,7 @@ defineFunction: FUNCTION IDENTIFIER '(' argumentList ')' ':' returnType = typeId
 argumentList: (argument (',' argument)*)? ;
 argument: typeId IDENTIFIER ;
 
-statementList: '{' declaringStmt* '}' ;
-declaringStmt: statement | declareStatement ';' ;
+statementList: '{' statement* '}' ;
 
 statement
     : ifStatement
@@ -21,9 +22,10 @@ statement
     | returnStatement ';'
     | loopControlStatement ';'
     | nullStatement
+    | declareStatement ';'
     ;
 
-declareStatement: typeId IDENTIFIER assignOperators value = expression ;
+declareStatement: typeId IDENTIFIER '=' value = expression ;
 returnStatement: RETURN expression? ;
 loopControlStatement: BREAK | CONTINUE ;
 nullStatement: ';' ;
@@ -31,7 +33,7 @@ ifStatement: IF '(' expression ')' then = statement (ELSE otherwise = statement)
 whileStatement: WHILE '(' expression ')' body = statement ;
 forStatement: FOR '(' declareStatement ';' expression ';' expression ')' body = statement;
 
-assignment: expression (assignOperators expression)? ;
+assignment: expression ('=' expression)? ;
 
 expression: orExpression ;
 orExpression: andExpression (op+=LOGICAL_OR rest+=andExpression)* ;
@@ -86,14 +88,6 @@ literal
     | STRING
     ;
 
-assignOperators
-    : ASSIGN
-    | DIVIDE_ASSIGN
-    | MINUS_ASSIGN
-    | PLUS_ASSIGN
-    | STAR_ASSIGN
-    | MODUO_ASSIGN
-    ;
 
 // Lexical Grammar
 
@@ -123,11 +117,11 @@ DEC: '--';
 
 // Assignment operators
 ASSIGN: '=';
-PLUS_ASSIGN: '+=';
-MINUS_ASSIGN: '-=';
-STAR_ASSIGN: '*=';
-DIVIDE_ASSIGN: '/=';
-MODUO_ASSIGN: '%=';
+//PLUS_ASSIGN: '+=';
+//MINUS_ASSIGN: '-=';
+//STAR_ASSIGN: '*=';
+//DIVIDE_ASSIGN: '/=';
+//MODUO_ASSIGN: '%=';
 
 // Numbers
 NUMBER: '-'? (WHOLE | '0');
