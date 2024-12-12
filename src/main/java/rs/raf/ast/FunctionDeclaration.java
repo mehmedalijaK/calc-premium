@@ -13,9 +13,9 @@ public class FunctionDeclaration extends Statement {
     private Arguments args;
     private Type returnType;
     private String name;
-    private Block body;
+    private StatementList body;
 
-    public FunctionDeclaration (Location location, Arguments args, String name, Type returnType, Block body) {
+    public FunctionDeclaration (Location location, Arguments args, String name, Type returnType, StatementList body) {
         super (location);
         this.args = args;
         this.returnType = returnType;

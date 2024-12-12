@@ -40,9 +40,9 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
         var returnType = typeBuilder(visit(ctx.returnType).toString());
         var declLoc = getLocation(ctx.start).span(getLocation(ctx.returnType.start));
 
-        Block body = null;
+        StatementList body = null;
         if (ctx.body != null) {
-            body = (Block) visit(ctx.body);
+            body = (StatementList) visit(ctx.body);
         }
 
         return new FunctionDeclaration(declLoc, args, name, returnType, body);
@@ -95,13 +95,14 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
         var name = ctx.IDENTIFIER().getText();
         var value = (Expression) visit(ctx.value);
 
-        var decl = new DeclarationStatement(getLocation(ctx), type, name, value);
-        return null;
+        return new DeclarationStatement(getLocation(ctx), type, name, value);
     }
 
     @Override
     public Tree visitReturnStatement(CalcPremiumParser.ReturnStatementContext ctx) {
-        return null;
+        // Collect return expression
+        var exp = (Expression) visit(ctx.expression());
+        return new ReturnStatement(getLocation(ctx.RETURN()), exp);
     }
 
     @Override
@@ -116,12 +117,17 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
 
     @Override
     public Tree visitIfStatement(CalcPremiumParser.IfStatementContext ctx) {
-        return null;
+        Expression condition = (Expression) visit(ctx.expression());
+        StatementList ifBlock = (StatementList) visit(ctx.then);
+        StatementList elseBlock = (StatementList) visit(ctx.otherwise);
+        return new IfStatement(getLocation(ctx), condition, ifBlock, elseBlock);
     }
 
     @Override
     public Tree visitWhileStatement(CalcPremiumParser.WhileStatementContext ctx) {
-        return null;
+        Expression condition = (Expression) visit(ctx.expression());
+        StatementList block = (StatementList) visit(ctx.body);
+        return new WhileStatement(getLocation(ctx), condition, block);
     }
 
     @Override
