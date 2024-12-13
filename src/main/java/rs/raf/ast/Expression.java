@@ -34,8 +34,8 @@ public class Expression extends Tree {
 
     public Expression(Location location, Operation operation, Expression lhs, Expression rhs) {
         super(location);
-        if (operation == Operation.VALUE)
-            throw new IllegalArgumentException("cannot construct a value like that");
+//        if (operation == Operation.VALUE)
+//            throw new IllegalArgumentException("cannot construct a value like that");
         this.operation = operation;
         this.lhs = Objects.requireNonNull(lhs);
         this.rhs = Objects.requireNonNull(rhs);

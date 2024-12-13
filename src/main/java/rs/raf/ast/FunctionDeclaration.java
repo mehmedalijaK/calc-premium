@@ -11,11 +11,11 @@ import lombok.Setter;
 public class FunctionDeclaration extends Statement {
 
     private ArgumentList args;
-    private Type returnType;
+    private PrimitiveType returnType;
     private String name;
     private StatementList body;
 
-    public FunctionDeclaration (Location location, ArgumentList args, String name, Type returnType, StatementList body) {
+    public FunctionDeclaration (Location location, ArgumentList args, String name, PrimitiveType returnType, StatementList body) {
         super (location);
         this.args = args;
         this.returnType = returnType;
@@ -26,7 +26,7 @@ public class FunctionDeclaration extends Statement {
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
         pp.node("FunctionDeclaration", () -> {
-            pp.terminal(returnType.toString() + " " + name);
+            pp.terminal(returnType.getType().getStringRepresentation() + " " + name);
 
             pp.node("Arguments", () -> args.prettyPrint(pp));
 

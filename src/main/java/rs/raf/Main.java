@@ -3,6 +3,8 @@ package rs.raf;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import rs.raf.ast.ASTPrettyPrinter;
+import rs.raf.ast.FunctionDeclarationList;
+import rs.raf.ast.StatementList;
 import rs.raf.parser.CSTtoASTConverter;
 import rs.raf.calc.CalcPremium;
 import rs.raf.lexer.Scanner;
@@ -70,8 +72,8 @@ public class Main {
 
         System.out.println("AST:");
         var pp = new ASTPrettyPrinter(System.out);
-//        var program = (StatementList) tree.accept(treeProcessor);
-//        program.prettyPrint(pp);
+        var program = (FunctionDeclarationList) tree.accept(treeProcessor);
+        program.prettyPrint(pp);
         if (calculator.hadError()) return;
 
     }

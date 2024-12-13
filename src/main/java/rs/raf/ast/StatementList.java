@@ -17,6 +17,6 @@ public class StatementList extends Tree {
 
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
-        pp.node("statements", () -> stmts.forEach (x -> x.prettyPrint(pp)));
+        pp.node("Statements", () -> stmts.forEach (x -> x.prettyPrint(pp)));
     }
 }

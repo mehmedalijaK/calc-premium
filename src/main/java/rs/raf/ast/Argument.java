@@ -14,8 +14,7 @@ public class Argument extends Statement {
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
         pp.node("Argument", () -> {
-            pp.terminal(type.toString());
-            pp.terminal(identifier);
+            pp.terminal("%s %s".formatted(type.getType().getStringRepresentation(), identifier));
         });
     }
 }

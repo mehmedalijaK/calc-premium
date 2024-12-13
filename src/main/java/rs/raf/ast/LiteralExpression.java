@@ -4,7 +4,7 @@ public class LiteralExpression extends Expression {
     private final Object value;
 
     public LiteralExpression(Location location, Object value) {
-        super(location, Operation.VALUE, null, null);
+        super(location);
         this.value = value;
     }
 

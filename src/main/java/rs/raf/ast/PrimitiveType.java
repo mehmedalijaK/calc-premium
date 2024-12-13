@@ -1,5 +1,12 @@
 package rs.raf.ast;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class PrimitiveType extends Expression {
 
     private Type type;
@@ -11,8 +18,6 @@ public class PrimitiveType extends Expression {
 
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
-        pp.node("PrimitiveType", () -> {
-            pp.terminal("Type: " + type.toString());
-        });
+        pp.node("PrimitiveType", () -> pp.terminal(type.getStringRepresentation()));
     }
 }

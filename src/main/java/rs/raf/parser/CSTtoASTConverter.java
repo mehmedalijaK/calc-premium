@@ -40,7 +40,7 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
     public Tree visitDefineFunction(CalcPremiumParser.DefineFunctionContext ctx) {
         var name = ctx.IDENTIFIER().getText();
         var args = (ArgumentList) visitArgumentList(ctx.argumentList());
-        var returnType = typeBuilder(visit(ctx.returnType).toString());
+        var returnType = (PrimitiveType) visit(ctx.returnType);
         var declLoc = getLocation(ctx.start).span(getLocation(ctx.returnType.start));
 
         StatementList body = null;
@@ -323,11 +323,18 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
         // Base expression (function being called)
         var base = (Expression) visit(ctx.term());
 
-        var args = ctx.args.expression()
-                .stream()
-                .map(this::visit)
-                .map(x -> (Expression) x) // Assuming each `declaringStmt` maps to a `Statement`
-                .toList();
+        assert ctx.args != null; // This can be removed or replaced with a null check
+
+        List<Expression> args = new ArrayList<>();
+
+        // Check if args is not null and has expressions
+        if (ctx.args != null) {
+            args = ctx.args.expression()
+                    .stream()
+                    .map(this::visit)
+                    .map(x -> (Expression) x)
+                    .toList();
+        }
 
         // Construct a FunctionCallExpression
         return new FunctionCallExpression(
