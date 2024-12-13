@@ -42,15 +42,14 @@ compareExpression: initial=relationalExpression (op+=(EQ | NEQ) rest+=relational
 relationalExpression: initial=additionExpression (op+=(LT | LTE | GT | GTE) rest+=additionExpression)* ;
 additionExpression: initial=multiplicationExpression (op+=(PLUS | MINUS) rest+=multiplicationExpression)* ;
 multiplicationExpression: initial=unaryExpression (op+=(STAR | DIVIDE | MODUO) rest+=unaryExpression)* ;
-unaryExpression: lhs=unarySuffixOperations (op=(LOGICAL_NOT | MINUS) rhs=unaryExpression)?;
+unaryExpression: op=(LOGICAL_NOT | MINUS) rhs=unaryExpression | unarySuffixExpr;
 
-unarySuffixOperations
-    : term ('(' args=expressionList ')')*
-    | term ('[' index=expression ']')*
-    | term ('.len')*
-    | term ('.new')*
-//    | term '++' #PostInc
-//    | term '--' #PostDec
+unarySuffixExpr: term unarySuffixOp*;
+unarySuffixOp
+    : '[' expression ']' #Index
+    | '(' (expression (',' expression)*)? ')' #Call
+    | '.len' #Length
+    | '.new' #PushArray
     ;
 
 term

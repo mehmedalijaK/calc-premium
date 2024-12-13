@@ -300,7 +300,7 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
     @Override
     public Tree visitUnaryExpression(CalcPremiumParser.UnaryExpressionContext ctx) {
         // Start with the left-hand side (lhs)
-        var value = (Expression) visit(ctx.lhs);
+        var value = (Expression) visit(ctx.rhs);
 
         // Handle the optional unary operation (LOGICAL_NOT or MINUS)
         if (ctx.op != null && ctx.rhs != null) {
