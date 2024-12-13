@@ -19,6 +19,11 @@ public final class FunctionDeclarationList extends Statement {
 
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
-        pp.node("statements", () -> funDeclarations.forEach (x -> x.prettyPrint(pp)));
+        pp.node("FunctionDeclarations", () -> {
+            // Iterate over the list of function declarations and pretty-print each one
+            for (FunctionDeclaration funDecl : funDeclarations) {
+                funDecl.prettyPrint(pp);
+            }
+        });
     }
 }

@@ -1,5 +1,13 @@
 package rs.raf.ast;
 
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class IfStatement extends Statement{
 
     private Expression condition;

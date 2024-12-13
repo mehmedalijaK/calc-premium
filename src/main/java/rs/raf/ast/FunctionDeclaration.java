@@ -1,21 +1,21 @@
 package rs.raf.ast;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.misc.Pair;
 
-import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class FunctionDeclaration extends Statement {
 
-    @Getter
-    @Setter
-    private Arguments args;
+    private ArgumentList args;
     private Type returnType;
     private String name;
     private StatementList body;
 
-    public FunctionDeclaration (Location location, Arguments args, String name, Type returnType, StatementList body) {
+    public FunctionDeclaration (Location location, ArgumentList args, String name, Type returnType, StatementList body) {
         super (location);
         this.args = args;
         this.returnType = returnType;
@@ -25,6 +25,12 @@ public class FunctionDeclaration extends Statement {
 
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
+        pp.node("FunctionDeclaration", () -> {
+            pp.terminal(returnType.toString() + " " + name);
 
+            pp.node("Arguments", () -> args.prettyPrint(pp));
+
+            pp.node("Body", () -> body.prettyPrint(pp));
+        });
     }
 }

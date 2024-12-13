@@ -2,18 +2,18 @@ grammar CalcPremium;
 
 options { visitor = true; }
 
-start: topLevel* EOF;
+start: topLevel* EOF; //DONE
 
 topLevel
-    : defineFunction ;
+    : defineFunction ; //DONE
 
-defineFunction: FUNCTION IDENTIFIER '(' argumentList ')' ':' returnType = typeId (body = statementList) ;
-argumentList: (argument (',' argument)*)? ;
-argument: typeId IDENTIFIER ;
+defineFunction: FUNCTION IDENTIFIER '(' argumentList ')' ':' returnType = typeId (body = statementList) ; //DONE
+argumentList: (argument (',' argument)*)? ; //DONE
+argument: typeId IDENTIFIER ; //DONE
 
-statementList: '{' statement* '}' ;
+statementList: '{' statement* '}' ; //DONE
 
-statement
+statement //DONE
     : ifStatement
     | whileStatement
     | forStatement
@@ -25,31 +25,32 @@ statement
     | declareStatement ';'
     ;
 
-declareStatement: typeId IDENTIFIER '=' value = expression ;
-returnStatement: RETURN expression? ;
-loopControlStatement: BREAK | CONTINUE ;
-nullStatement: ';' ;
-ifStatement: IF '(' expression ')' then = statement (ELSE otherwise = statement)? ;
-whileStatement: WHILE '(' expression ')' body = statement ;
-forStatement: FOR '(' declareStatement ';' expression ';' expression ')' body = statement;
+declareStatement: typeId IDENTIFIER '=' value = expression ; //DONE
+returnStatement: RETURN expression? ; //DONE
+loopControlStatement: BREAK | CONTINUE ; //DONE
+nullStatement: ';' ; //DONE
+ifStatement: IF '(' expression ')' then = statement (ELSE otherwise = statement)? ; //DONE
+whileStatement: WHILE '(' expression ')' body = statement ; //DONE
+forStatement: FOR '(' declareStatement ';' expression ';' expression ')' body = statement; //DONE
 
-assignment: expression ('=' expression)? ;
+assignment: expression ('=' expression)? ; //DONE
 
-expression: orExpression ;
-orExpression: andExpression (op+=LOGICAL_OR rest+=andExpression)* ;
-andExpression: compareExpression (op+=LOGICAL_AND rest+=compareExpression)* ;
-compareExpression: relationalExpression (op+=(EQ | NEQ) rest+=relationalExpression)* ;
-relationalExpression: additionExpression (op+=(LT | LTE | GT | GTE) rest+=additionExpression)* ;
-additionExpression: multiplicationExpression (op+=(PLUS | MINUS) rest+=multiplicationExpression)* ;
-multiplicationExpression: unaryExpression (op+=(STAR | DIVIDE | MODUO) rest+=unaryExpression)* ;
-unaryExpression: (MINUS | LOGICAL_NOT)? unarySuffix (INC | DEC)? ;
-unarySuffix: term unarySuffixOperations*;
+expression: orExpression ; //DONE
+orExpression: initial=andExpression (op+=LOGICAL_OR rest+=andExpression)* ;
+andExpression: initial=compareExpression (op+=LOGICAL_AND rest+=compareExpression)* ;
+compareExpression: initial=relationalExpression (op+=(EQ | NEQ) rest+=relationalExpression)* ;
+relationalExpression: initial=additionExpression (op+=(LT | LTE | GT | GTE) rest+=additionExpression)* ;
+additionExpression: initial=multiplicationExpression (op+=(PLUS | MINUS) rest+=multiplicationExpression)* ;
+multiplicationExpression: initial=unaryExpression (op+=(STAR | DIVIDE | MODUO) rest+=unaryExpression)* ;
+unaryExpression: lhs=unarySuffixOperations (op=(LOGICAL_NOT | MINUS) rhs=unaryExpression)?;
 
 unarySuffixOperations
-    : '(' args=expressionList ')' #Funcall
-    | '[' index=expression ']' #ArrIdx
-    | '.len' #ArrayLen
-    | '.new' #ArrayPush
+    : term ('(' args=expressionList ')')* #Funcall
+    | term ('[' index=expression ']')* #ArrIdx
+    | term ('.len')* #ArrayLen
+    | term ('.new')* #ArrayPush
+//    | term '++' #PostInc
+//    | term '--' #PostDec
     ;
 
 term
@@ -74,7 +75,6 @@ typeId:
     | INT_TYPE
     | BOOL_TYPE
     | VOID_TYPE
-    | IDENTIFIER
     | CHAR_TYPE
     | STRING_TYPE
     | arrayType

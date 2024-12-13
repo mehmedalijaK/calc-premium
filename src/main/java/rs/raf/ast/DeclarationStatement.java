@@ -9,11 +9,11 @@ import lombok.Setter;
 @Setter
 public class DeclarationStatement extends Statement {
 
-    private String type;
+    private Type type;
     private String name;
     private Expression initializer;
 
-    public DeclarationStatement (Location location, String type, String name, Expression initializer)
+    public DeclarationStatement (Location location, Type type, String name, Expression initializer)
     {
         super (location);
         this.type = type;
@@ -23,7 +23,7 @@ public class DeclarationStatement extends Statement {
 
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
-        pp.node("declaration of %s".formatted(type),
+        pp.node("declaration of %s %s".formatted(name, type),
                 () -> {
                     initializer.prettyPrint(pp);
                 });

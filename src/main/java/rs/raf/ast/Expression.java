@@ -19,7 +19,7 @@ public class Expression extends Tree {
 
         /** A vector or a number or a variable.  */
         VALUE(null),
-        ;
+        LOGICAL_OR("||"), LOGICAL_AND("&&"), EQUALS("=="), NOT_EQUALS("!="), LESS_THAN("<"), LESS_THAN_EQUAL("<="), GREATER_THAN(">"), GREATER_THAN_EQUAL(">="), MOD("%"), NEGATE("-"), LOGICAL_NOT("!"), ASSIGN("=");
 
         public final String label;
 

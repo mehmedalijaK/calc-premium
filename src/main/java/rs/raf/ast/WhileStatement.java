@@ -13,10 +13,9 @@ public class WhileStatement extends Statement {
 
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
-        pp.node("whileStatement",
-                () -> {
-                    condition.prettyPrint(pp);
-                    block.prettyPrint(pp);
-                });
+        pp.node("WhileStatement", () -> {
+            pp.node("Condition", () -> condition.prettyPrint(pp));
+            pp.node("Body", () -> block.prettyPrint(pp));
+        });
     }
 }

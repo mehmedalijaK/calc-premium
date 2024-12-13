@@ -3,7 +3,7 @@ package rs.raf;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import rs.raf.ast.ASTPrettyPrinter;
-import rs.raf.ast.CSTtoASTConverter;
+import rs.raf.parser.CSTtoASTConverter;
 import rs.raf.calc.CalcPremium;
 import rs.raf.lexer.Scanner;
 import rs.raf.parser.Parser;

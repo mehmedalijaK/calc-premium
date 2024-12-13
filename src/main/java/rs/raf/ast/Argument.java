@@ -1,10 +1,10 @@
 package rs.raf.ast;
 
 public class Argument extends Statement {
-    private final Type type;
+    private final PrimitiveType type;
     private final String identifier;
 
-    public Argument(Location loc, Type type, String identifier) {
+    public Argument(Location loc, PrimitiveType type, String identifier) {
         super(loc);
         this.type = type;
         this.identifier = identifier;
@@ -13,6 +13,9 @@ public class Argument extends Statement {
 
     @Override
     public void prettyPrint(ASTPrettyPrinter pp) {
-
+        pp.node("Argument", () -> {
+            pp.terminal(type.toString());
+            pp.terminal(identifier);
+        });
     }
 }
