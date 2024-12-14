@@ -149,18 +149,21 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
 
     @Override
     public Tree visitAssignment(CalcPremiumParser.AssignmentContext ctx) {
-        // Visit the left-hand side (target) and right-hand side (value) expressions
+        // Visit the left-hand side (target)
         var lhs = (Expression) visit(ctx.expression(0));
         var location = getLocation(ctx.expression(0));
 
-        Expression rhs = null;
         if (ctx.expression().size() > 1) {
-            rhs = (Expression) visit(ctx.expression(1));
+            // Handle full assignment with left-hand side and right-hand side
+            var rhs = (Expression) visit(ctx.expression(1));
             location = location.span(getLocation(ctx.expression(1)));
-        }
 
-        // Create an Expression with the ASSIGN operation
-        return new Expression(location, Expression.Operation.ASSIGN, lhs, rhs);
+            // Return an assignment operation expression
+            return new ExpressionStatement(location, lhs, rhs);
+        } else {
+            // Handle standalone expression as a statement (e.g., `x;`)
+            return new ExpressionStatement(location, lhs, null);
+        }
     }
 
     @Override
@@ -184,7 +187,7 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
                 throw new IllegalArgumentException("unhandled expr op " + op);
             }
             var loc = value.getLocation().span(rhs.getLocation());
-            value = new Expression(loc, exprOp, value, rhs);
+            value = new Expression(loc, exprOp, List.of(value, rhs));
         }
         return value;
     }
@@ -205,7 +208,7 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
                 throw new IllegalArgumentException("unhandled expr op " + op);
             }
             var loc = value.getLocation().span(rhs.getLocation());
-            value = new Expression(loc, exprOp, value, rhs);
+            value = new Expression(loc, exprOp, List.of(value, rhs));
         }
         return value;
     }
@@ -226,7 +229,7 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
             };
 
             var loc = value.getLocation().span(rhs.getLocation());
-            value = new Expression(loc, exprOp, value, rhs);
+            value = new Expression(loc, exprOp, List.of(value, rhs));
         }
         return value;
     }
@@ -249,7 +252,7 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
             };
 
             var loc = value.getLocation().span(rhs.getLocation());
-            value = new Expression(loc, exprOp, value, rhs);
+            value = new Expression(loc, exprOp, List.of(value, rhs));
         }
         return value;
     }
@@ -270,7 +273,7 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
             };
 
             var loc = value.getLocation().span(rhs.getLocation());
-            value = new Expression(loc, exprOp, value, rhs);
+            value = new Expression(loc, exprOp, List.of(value, rhs));
         }
         return value;
     }
@@ -292,54 +295,69 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
             };
 
             var loc = value.getLocation().span(rhs.getLocation());
-            value = new Expression(loc, exprOp, value, rhs);
+            value = new Expression(loc, exprOp, List.of(value, rhs));
         }
         return value;
     }
 
     @Override
     public Tree visitUnaryExpression(CalcPremiumParser.UnaryExpressionContext ctx) {
-        // Start with the left-hand side (lhs)
-        var value = (Expression) visit(ctx.rhs);
+        // Get the operator and the value expression
+        var operator = ctx.unaryOp;
+        var value = (Expression) visit(ctx.unarySuffix());
 
-        // Handle the optional unary operation (LOGICAL_NOT or MINUS)
-        if (ctx.op != null && ctx.rhs != null) {
-            var unaryOp = switch (ctx.op.getType()) {
-                case CalcPremiumLexer.LOGICAL_NOT -> Expression.Operation.LOGICAL_NOT;
-                case CalcPremiumLexer.MINUS -> Expression.Operation.NEGATE;
-                default -> throw new IllegalArgumentException("Unhandled unary operator: " + ctx.op.getText());
+        if (operator != null) {
+            // Map the operator to its corresponding operation
+            var operation = switch (operator.getType()) {
+                case CalcPremiumParser.MINUS -> Expression.Operation.NEGATE;
+                case CalcPremiumParser.LOGICAL_NOT -> Expression.Operation.LOGICAL_NOT;
+                default -> throw new AssertionError("Unknown unary operator: " + operator.getText());
             };
 
-            var rhs = (Expression) visit(ctx.rhs);
-            var loc = value.getLocation().span(rhs.getLocation());
-            value = new Expression(loc, unaryOp, value, rhs);
+            // Return the unary expression
+            return new Expression(
+                    getLocation(ctx).span(getLocation(operator)),
+                    operation,
+                    List.of(value)
+            );
         }
 
+        // Return the value directly if no operator
         return value;
+    }
+
+    private Expression currExpr;
+    @Override
+    public Tree visitUnarySuffix(CalcPremiumParser.UnarySuffixContext ctx) {
+        // Visit the initial term
+        var expression = (Expression) visit(ctx.term());
+        currExpr = expression;
+        // Process each unary suffix operator
+        for (var suffix : ctx.unarySuffixOp()) {
+            expression = (Expression) visit (suffix);;
+        }
+
+        return expression;
     }
 
     @Override
     public Tree visitFuncall(CalcPremiumParser.FuncallContext ctx) {
         // Base expression (function being called)
-        var base = (Expression) visit(ctx.term());
-
         assert ctx.args != null; // This can be removed or replaced with a null check
 
-        List<Expression> args = new ArrayList<>();
+        List<Expression> args;
 
         // Check if args is not null and has expressions
-        if (ctx.args != null) {
-            args = ctx.args.expression()
-                    .stream()
-                    .map(this::visit)
-                    .map(x -> (Expression) x)
-                    .toList();
-        }
+        args = ctx.args.expression()
+                .stream()
+                .map(this::visit)
+                .map(x -> (Expression) x)
+                .toList();
 
         // Construct a FunctionCallExpression
-        return new FunctionCallExpression(
+        return new Expression(
                 getLocation(ctx),
-                base,
+                Expression.Operation.FUNCALL,
                 args
         );
     }
@@ -347,40 +365,42 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
     @Override
     public Tree visitArrIdx(CalcPremiumParser.ArrIdxContext ctx) {
         // Base expression (array being accessed)
-        var base = (Expression) visit(ctx.term());
+        var base = currExpr;
 
         // Index expression
         var index = (Expression) visit(ctx.index);
 
-        // Construct an ArrayIndexExpression
-        return new ArrayIndexExpression(
+        // Construct an array index expression
+        return new Expression(
                 getLocation(ctx),
-                base,
-                index
+                Expression.Operation.INDEX,
+                List.of(base, index)
         );
     }
 
     @Override
     public Tree visitArrayLen(CalcPremiumParser.ArrayLenContext ctx) {
         // Base expression (array whose length is being queried)
-        var base = (Expression) visit(ctx.term());
+        var base = currExpr;
 
-        // Construct an ArrayLengthExpression
-        return new ArrayLengthExpression(
+        // Construct an array length expression
+        return new Expression(
                 getLocation(ctx),
-                base
+                Expression.Operation.LENGTH,
+                List.of(base)
         );
     }
 
     @Override
     public Tree visitArrayPush(CalcPremiumParser.ArrayPushContext ctx) {
         // Base expression (array to which elements are being added)
-        var base = (Expression) visit(ctx.term());
+        var base = currExpr;
 
-        // Construct an ArrayPushExpression
-        return new ArrayPushExpression(
+        // Construct an array push expression
+        return new Expression(
                 getLocation(ctx),
-                base
+                Expression.Operation.PUSH,
+                List.of(base)
         );
     }
 

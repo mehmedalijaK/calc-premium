@@ -25,6 +25,7 @@ statement
     | declareStatement ';'
     ;
 
+
 declareStatement: typeId IDENTIFIER '=' value = expression ;
 returnStatement: RETURN expression? ;
 loopControlStatement: BREAK | CONTINUE ;
@@ -42,14 +43,15 @@ compareExpression: initial=relationalExpression (op+=(EQ | NEQ) rest+=relational
 relationalExpression: initial=additionExpression (op+=(LT | LTE | GT | GTE) rest+=additionExpression)* ;
 additionExpression: initial=multiplicationExpression (op+=(PLUS | MINUS) rest+=multiplicationExpression)* ;
 multiplicationExpression: initial=unaryExpression (op+=(STAR | DIVIDE | MODUO) rest+=unaryExpression)* ;
-unaryExpression: op=(LOGICAL_NOT | MINUS) rhs=unaryExpression | unarySuffixExpr;
+unaryExpression: unaryOp=(MINUS | LOGICAL_NOT)? unarySuffix;
 
-unarySuffixExpr: term unarySuffixOp*;
+unarySuffix: term unarySuffixOp*;
+
 unarySuffixOp
-    : '[' expression ']' #Index
-    | '(' (expression (',' expression)*)? ')' #Call
-    | '.len' #Length
-    | '.new' #PushArray
+    : '(' args=expressionList ')' #Funcall
+    | '[' index=expression ']' #ArrIdx
+    | '?len' #ArrayLen
+    | '?new' #ArrayPush
     ;
 
 term
