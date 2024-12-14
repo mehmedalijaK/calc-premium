@@ -32,7 +32,7 @@ loopControlStatement: BREAK | CONTINUE ;
 nullStatement: ';' ;
 ifStatement: IF '(' expression ')' then = statement (ELSE otherwise = statement)? ;
 whileStatement: WHILE '(' expression ')' body = statement ;
-forStatement: FOR '(' declareStatement ';' expression ';' expression ')' body = statement;
+forStatement: FOR '(' declareStatement ';' expression ';' assignment ')' body = statement;
 
 assignment: expression ('=' expression)? ;
 

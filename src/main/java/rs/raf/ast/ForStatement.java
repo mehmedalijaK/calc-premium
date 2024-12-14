@@ -10,10 +10,10 @@ import lombok.Setter;
 public class ForStatement extends Statement {
     private DeclarationStatement declaration;
     private Expression condition;
-    private Expression incrementExpression;
+    private ExpressionStatement incrementExpression;
     private StatementList body;
 
-    public ForStatement(Location location, DeclarationStatement declaration, Expression condition, Expression incrementExpr, StatementList block) {
+    public ForStatement(Location location, DeclarationStatement declaration, Expression condition, ExpressionStatement incrementExpr, StatementList block) {
         super(location);
         this.declaration = declaration;
         this.condition = condition;

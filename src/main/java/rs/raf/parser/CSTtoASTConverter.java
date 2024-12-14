@@ -140,8 +140,8 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
     @Override
     public Tree visitForStatement(CalcPremiumParser.ForStatementContext ctx) {
         DeclarationStatement declaration = (DeclarationStatement) visit(ctx.declareStatement());
-        Expression condition = (Expression) visit(ctx.expression(0));
-        Expression incrementExpr = (Expression) visit(ctx.expression(1));
+        Expression condition = (Expression) visit(ctx.expression());
+        ExpressionStatement incrementExpr = (ExpressionStatement) visit(ctx.assignment());
         StatementList block = (StatementList) visit(ctx.body);
 
         return new ForStatement(getLocation(ctx), declaration, condition, incrementExpr, block);
