@@ -334,10 +334,10 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
         currExpr = expression;
         // Process each unary suffix operator
         for (var suffix : ctx.unarySuffixOp()) {
-            expression = (Expression) visit (suffix);;
+            currExpr = (Expression) visit (suffix);;
         }
 
-        return expression;
+        return currExpr;
     }
 
     @Override
@@ -345,20 +345,18 @@ public class CSTtoASTConverter extends AbstractParseTreeVisitor<Tree> implements
         // Base expression (function being called)
         assert ctx.args != null; // This can be removed or replaced with a null check
 
-        List<Expression> args;
+        var operands = new ArrayList<Expression>();
+        operands.add(currExpr);
 
-        // Check if args is not null and has expressions
-        args = ctx.args.expression()
+        ctx.args.expression()
                 .stream()
                 .map(this::visit)
                 .map(x -> (Expression) x)
-                .toList();
-
-        // Construct a FunctionCallExpression
+                .forEach(operands::add);
         return new Expression(
                 getLocation(ctx),
                 Expression.Operation.FUNCALL,
-                args
+                operands
         );
     }
 
